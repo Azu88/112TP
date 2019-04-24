@@ -6,27 +6,57 @@ from tkinter import *
 
 from gui.design import *
 from gui.toolbar import *
-from data.location import *
+from gui.tiles import *
+from data import recommendedLocalActivities
 
 ####################################
 
 def init(data):
     data.toolbarHeight = data.height / 8
     data.filters = [Filter("Distance", []),
-                    Filter("Price", []),
-                    Filter("Time", []),
-                    Filter("Category", [])]
+                    Filter("Price", [])]
+    recommendationList = recommendedLocalActivities.openRecommendationList()
+    data.activities = [Tile(recommendationList[i][0], recommendationList[i][1], 
+                       i) for i in range(len(recommendationList))]
+    data.tileGrid = {"rows": 2, "cols" : 3}
+    data.scrollY = 0
+    data.scrollSpeed = 10
+    data.drawingSmallTiles = True
     
 def mousePressed(event, data):
-    pass
+    if data.drawingSmallTiles:
+        for activity in data.activities:
+            if activity.clickInTile(data, event.x, event.y):
+                activity.smallTileIsClicked = True
+                data.drawingSmallTiles = False
+                break
+    else:
+        for activity in data.activities:
+            if activity.smallTileIsClicked:
+                if not activity.clickInTile(data, event.x, event.y):
+                    activity.smallTileIsClicked = False
+                    data.drawingSmallTiles = True
+                    break
 
 def keyPressed(event, data):
-    pass
+    if event.keysym == "Up":
+        if data.scrollY > 0:
+            data.scrollY -= data.scrollSpeed
+    elif event.keysym == "Down":
+        data.scrollY += data.scrollSpeed
 
 def timerFired(data):
     pass
 
 def redrawAll(canvas, data):
+    # draw large activity tiles
+    for activity in data.activities:
+        if activity.smallTileIsClicked:
+            activity.drawBigTile(data, canvas)
+    # draw small activity tiles
+    if data.drawingSmallTiles:
+        for activity in data.activities:
+            activity.drawSmallTile(data, canvas)
     # draw toolbar
     canvas.create_rectangle(0, 0, data.width, data.toolbarHeight, 
                             fill = design.colors["toolbar"], width=0)
@@ -65,7 +95,7 @@ def runApp(width=800, height=600):
     data = Struct()
     data.width = width
     data.height = height
-    data.timerDelay = 1000 # milliseconds
+    # data.timerDelay = 1000 # milliseconds
     root = Tk()
     root.title("Bored?")
     root.resizable(width=False, height=False) # prevents resizing window
@@ -79,6 +109,7 @@ def runApp(width=800, height=600):
                             mousePressedWrapper(event, canvas, data))
     root.bind("<Key>", lambda event:
                             keyPressedWrapper(event, canvas, data))
-    timerFiredWrapper(canvas, data)
+    redrawAllWrapper(canvas, data)
+    # timerFiredWrapper(canvas, data)
     # and launch the app
     root.mainloop()  # blocks until window is closed

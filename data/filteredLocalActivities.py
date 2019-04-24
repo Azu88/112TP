@@ -43,4 +43,6 @@ def storeCurrentSet():
         json.dump(currentSet, file)
     
 def openCurrentSet():
-    pass
+    with open(path, "r") as file:
+        currentSet = json.load(file)
+    return currentSet
