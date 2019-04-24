@@ -24,6 +24,8 @@ def getUserLocation():
 
 # apply Haversine formula to calculate distance between two coordinate points    
 def getDistance(lat1, long1, lat2, long2, unit):
+    if lat1 is None or long1 is None or lat2 is None or long2 is None:
+        return None
     # formula
     r = 6371000 # radius of Earth in meters
     phi1 = math.radians(lat1)
