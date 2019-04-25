@@ -1,11 +1,11 @@
 import json
 
-from data import localActivities
+from data import localActivities, favoriteActivities
 
 path = "data/session/currentSet.json"
 
-filters = {"Distance" : 254,
-           "Price" : "free"}
+filters = {"Distance" : None,
+           "Price" : None}
 
 def passesFilters(filters, features):
     for filter in filters:
@@ -20,16 +20,19 @@ def passesFilters(filters, features):
                     return False
     return True
 
-def createCurrentSet():
+def createCurrentSet(favorites):
     baseSet = localActivities.openBaseSet()
     currentSet = None
     if baseSet is None:
         return currentSet
-    elif set(filters.values()) == set([None]):
+    elif not favorites and set(filters.values()) == set([None]):
         currentSet = baseSet
     else:
         currentSet = {}
         for activity in baseSet:
+            if favorites:
+                if activity not in favoriteActivities.favoriteActivities:
+                    continue
             features = baseSet[activity]
             if passesFilters(filters, features):
                 currentSet[activity] = features
@@ -37,8 +40,8 @@ def createCurrentSet():
         return currentSet
     else: return None
     
-def storeCurrentSet():
-    currentSet = createCurrentSet()
+def storeCurrentSet(favorites=False):
+    currentSet = createCurrentSet(favorites)
     with open(path, "w+") as file:
         json.dump(currentSet, file)
     

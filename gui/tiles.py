@@ -1,10 +1,13 @@
 from gui import design
+from gui import toolbar
+from data import favoriteActivities
 
 class Tile(object):
     marginOutside = 20
     
     def __init__(self, activityName, activityFeatures, gridIndex):
         self.activityName = activityName
+        self.activityFeatures = activityFeatures
         self.placeName = activityFeatures["placeName"]
         self.url = activityFeatures["url"]
         self.location = activityFeatures["location"]
@@ -16,6 +19,15 @@ class Tile(object):
         self.gridIndex = gridIndex
         self.smallTileIsClicked = False
         self.bigTileIsClicked = False
+        self.favoriteButton = toolbar.FavoriteIcon()
+        self.isFavorite = self.checkIfFavorite()
+        
+    def checkIfFavorite(self):
+        favorites = favoriteActivities.favoriteActivities
+        if favorites is not None and self.activityName in favorites:
+            return True
+        else:
+            return False
         
     def getSmallTileCoordinates(self, data):
         marginOutside = Tile.marginOutside
@@ -49,6 +61,11 @@ class Tile(object):
             if y0 <= eventY <= y1:
                 return True
         return False
+    
+    def favorite(self):
+        self.isFavorite = not self.isFavorite
+        favoriteActivities.updateFavoriteActivities(self.activityName,
+                                                    self.activityFeatures)
         
     def formatText(self, text, x0, x1, y0, y1, fontSize):
         formattedText = ""
@@ -142,3 +159,8 @@ class Tile(object):
                            anchor="center", font=titleFont,
                            fill=design.colors["tileText"],
                            text=title)
+        favButtonColor = design.colors["bigTileFaveIcon"]
+        if not self.isFavorite: favButtonColor = design.colors["filter"]
+        self.favoriteButton.draw(data, canvas, x0, y0, x1, y1,
+                                 color=favButtonColor,
+                                 text="Favorite")
