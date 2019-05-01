@@ -1,12 +1,19 @@
+####################################
+# Current Set Functions
+####################################
+
 import json
 
 from data import localActivities, favoriteActivities
+
+####################################
 
 path = "data/session/currentSet.json"
 
 filters = {"Distance" : None,
            "Price" : None}
 
+# check if given activity passes user's filter settings
 def passesFilters(filters, features):
     for filter in filters:
         if filters[filter] is None: continue
@@ -20,18 +27,22 @@ def passesFilters(filters, features):
                     return False
     return True
 
-def createCurrentSet(favorites):
+# generate current set of filtered local activities
+def createCurrentSet(onlyFavorites):
     baseSet = localActivities.openBaseSet()
     currentSet = None
     if baseSet is None:
         return currentSet
-    elif not favorites and set(filters.values()) == set([None]):
+    elif not onlyFavorites and set(filters.values()) == set([None]):
         currentSet = baseSet
     else:
         currentSet = {}
+        if onlyFavorites:
+            favorites = favoriteActivities.openFavoriteActivities()
+            if favorites is None: return None
         for activity in baseSet:
-            if favorites:
-                if activity not in favoriteActivities.favoriteActivities:
+            if onlyFavorites:
+                if activity not in favorites:
                     continue
             features = baseSet[activity]
             if passesFilters(filters, features):
@@ -40,11 +51,13 @@ def createCurrentSet(favorites):
         return currentSet
     else: return None
     
+# create current set and write to a file
 def storeCurrentSet(favorites=False):
     currentSet = createCurrentSet(favorites)
     with open(path, "w+") as file:
         json.dump(currentSet, file)
     
+# open current set file and return contents
 def openCurrentSet():
     with open(path, "r") as file:
         currentSet = json.load(file)

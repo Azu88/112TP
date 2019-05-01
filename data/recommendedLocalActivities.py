@@ -1,34 +1,37 @@
+####################################
+# Recommendation List Functions
+####################################
+
 import json
 import os
 
-from data import filteredLocalActivities
+from data import filteredLocalActivities, rank
+
+####################################
 
 path = "data/session/recommendationList.json"
 
-numRecommendations = 10
-
+# generate recommendation list of filtered, ranked local activities
 def createRecommendationList():
     currentSet = filteredLocalActivities.openCurrentSet()
     recommendationList = []
     if currentSet is not None:
         for activity in currentSet:
-            entry = [activity, currentSet[activity]]
+            tags = currentSet[activity]["categories"]
+            score = rank.getActivityScore(tags)
+            entry = [activity, currentSet[activity], score]
             recommendationList.append(entry)
-            if len(recommendationList) == numRecommendations:
-                break
+        recommendationList = rank.sortActivityList(recommendationList)
     return recommendationList
 
+# create recommendation list and write to a file
 def storeRecommendationList():
-    os.chmod("data/session", 0o777)
     recommendationList = createRecommendationList()
     with open(path, "w+") as file:
         json.dump(recommendationList, file)
         
+# open recommendation list file and return contents
 def openRecommendationList():
     with open(path, "r") as file:
         recommendationList = json.load(file)
-    return recommendationList
-    
-def getRecommendationList():
-    recommendationList = createRecommendationList()
     return recommendationList

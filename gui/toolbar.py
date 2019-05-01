@@ -1,4 +1,10 @@
+####################################
+# Toolbar Element Classes
+####################################
+
 from gui import design
+
+####################################
 
 class Filter(object):
     
@@ -8,6 +14,28 @@ class Filter(object):
         self.filterIndex = filterIndex
         self.selection = None
         self.isClicked = False
+        
+## calculate button coordinates
+        
+    def getFilterCoordinates(self, data):
+        marginOutside = data.toolbarHeight / 5
+        filterIndex = self.filterIndex
+        buttonWidth = 100
+        x0 = marginOutside * (filterIndex + 1) + buttonWidth * filterIndex
+        y0 = marginOutside
+        x1 = marginOutside * (filterIndex + 1) + buttonWidth * (filterIndex + 1)
+        y1 = data.toolbarHeight - marginOutside
+        return ((x0, y0, x1, y1))
+        
+    def getOptionCoordinates(self, data, i):
+        x0, y0, x1, y1 = self.getFilterCoordinates(data)
+        optionX0 = x0
+        optionY0 = y1 + (y1 - y0) * (i)
+        optionX1 = x1
+        optionY1 = y1 + (y1 - y0) * (i + 1)
+        return ((optionX0, optionY0, optionX1, optionY1))
+        
+## check attributes
         
     def clickInFilter(self, data, eventX, eventY):
         x0, y0, x1, y1 = self.getFilterCoordinates(data)
@@ -23,25 +51,7 @@ class Filter(object):
                 return True
         return False
     
-    def getFilterCoordinates(self, data):
-        marginOutside = data.toolbarHeight / 5
-        filterIndex = self.filterIndex
-        buttonWidth = 100
-        x0 = marginOutside * (filterIndex + 1) + buttonWidth * filterIndex
-        y0 = marginOutside
-        x1 = marginOutside * (filterIndex + 1) + buttonWidth * (filterIndex + 1)
-        y1 = data.toolbarHeight - marginOutside
-        return ((x0, y0, x1, y1))
-        
-    def getOptionCoordinates(self, data, i):
-        x0, y0, x1, y1 = self.getFilterCoordinates(data)
-        buttonWidth = x1 - x0
-        buttonHeight = y1 - y0
-        optionX0 = x0
-        optionY0 = y1 + buttonHeight * (i)
-        optionX1 = x1
-        optionY1 = y1 + buttonHeight * (i + 1)
-        return ((optionX0, optionY0, optionX1, optionY1))
+## draw buttons
     
     def drawDropdown(self, data, canvas):
         x0, y0, x1, y1 = self.getFilterCoordinates(data)
@@ -50,9 +60,11 @@ class Filter(object):
         for i in range(len(self.options)):
             option = self.options[i]
             optionX0, optionY0, optionX1, optionY1 = self.getOptionCoordinates(data, i)
+            color = design.colors["filterDropdown"]
+            if option == self.selection: color = design.colors["filterSelected"]
             canvas.create_rectangle(optionX0, optionY0, optionX1, optionY1,
-                                    fill=design.colors["filterDropdown"],
-                                    width=1)
+                                    fill=color,
+                                    width=0, activefill=design.colors["filterHover"])
             textX = optionX0 + buttonWidth / 2
             textY = optionY0 + buttonHeight / 2
             font = design.fonts["filterText"] + " " + str(10)
@@ -68,7 +80,7 @@ class Filter(object):
         x0, y0, x1, y1 = self.getFilterCoordinates(data)
         # create filter button
         canvas.create_rectangle(x0, y0, x1, y1, 
-                                fill=design.colors["filter"], width=1)
+                                fill=design.colors["filter"], width=0)
         # create filter text
         textX = x0 + (x1 - x0) / 2
         textY = y0 + (y1 - y0) / 2
@@ -78,7 +90,9 @@ class Filter(object):
         # draw dropdown
         if self.isClicked:
             self.drawDropdown(data, canvas)
-    
+
+####################################
+
 class FavoriteIcon(object):
     def __init__(self):
         self.name = "Favorites"
@@ -108,7 +122,7 @@ class FavoriteIcon(object):
         buttonX0, buttonY0, buttonX1, buttonY1 = self.getCoordinates(data, x0, y0, x1, y1)
         # create filter button
         canvas.create_rectangle(buttonX0, buttonY0, buttonX1, buttonY1, 
-                                fill=color, width=1)
+                                fill=color, width=0)
         # create filter text
         textX = buttonX0 + (buttonX1 - buttonX0) / 2
         textY = buttonY0 + (buttonY1 - buttonY0) / 2

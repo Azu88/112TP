@@ -1,6 +1,8 @@
 colors = {"toolbar" : "snow2",
           "filter" : "snow3",
           "filterDropdown" : "snow4",
+          "filterHover" : "ghost white",
+          "filterSelected" : "white",
           "filterText" : "gray30",
           "smallTile" : "papaya whip",
           "smallTileHeading" : "bisque",
