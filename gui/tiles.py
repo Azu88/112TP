@@ -121,7 +121,8 @@ class Tile(object):
                            anchor="center", font=headingFont,
                            fill=design.colors["tileText"], text=heading)
         # create contents
-        if self.description is None: description = "Description not available."
+        if self.description is None:
+            description = "Description not available."
         else:
             descriptionCutoff = int(((x1 - x0) - marginInside) * 
                                 (y1 - y0) // (18 * contentsFontSize))
@@ -163,6 +164,7 @@ class Tile(object):
                            width=((x1 - x0) - marginInside))
         # create favorite button
         favButtonColor = design.colors["bigTileFaveIcon"]
-        if not self.isFavorite: favButtonColor = design.colors["filter"]
+        if not self.isFavorite:
+            favButtonColor = design.colors["filter"]
         self.favoriteButton.draw(data, canvas, x0, y0, x1, y1,
                                  color=favButtonColor, text="Favorite")

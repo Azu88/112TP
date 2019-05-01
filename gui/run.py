@@ -22,7 +22,8 @@ def init(data):
     data.usingFilter = False
     # toolbar
     data.filters = [Filter("Distance", [1, 253, 260], 0), #[1, 5, 10, 25, 50, 100], 0),
-                    Filter("Price", ["free", "$", "$$", "$$$"], 1)]
+                    Filter("Price", ["free", "$", "$$", "$$$"], 1),
+                    Filter("Category", filteredLocalActivities.categories, 2)]
     data.favoriteButton = FavoriteIcon()
     # generate activities to display
     rank.updateTagCount()

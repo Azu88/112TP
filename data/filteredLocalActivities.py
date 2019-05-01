@@ -10,8 +10,12 @@ from data import localActivities, favoriteActivities
 
 path = "data/session/currentSet.json"
 
+categories = ["Attractions", "Bakeries", "Bars", "Hotels", "Museums", 
+              "Music", "Parks", "Restaurants", "Shopping", "Sports"]
+
 filters = {"Distance" : None,
-           "Price" : None}
+           "Price" : None,
+           "Category" : None}
 
 # check if given activity passes user's filter settings
 def passesFilters(filters, features):
@@ -24,6 +28,10 @@ def passesFilters(filters, features):
         elif filter == "Price":
             if features["priceRange"] is not None:
                 if features["priceRange"] != filters[filter]:
+                    return False
+        elif filter == "Category":
+            if features["categories"] is not None:
+                if filters[filter].lower() not in features["categories"]:
                     return False
     return True
 

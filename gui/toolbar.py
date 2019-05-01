@@ -9,24 +9,30 @@ from gui import design
 class Filter(object):
     
     def __init__(self, name, options, filterIndex):
-        self.name = name # name of filter ( "name" )
-        self.options = options # dropdown options ( [option1, option2, ...] )
+        # filter information
+        self.name = name
+        self.options = options
+        # drawing information
         self.filterIndex = filterIndex
-        self.selection = None
+        # drawing status
         self.isClicked = False
+        # data stored
+        self.selection = None
         
 ## calculate button coordinates
         
+    # calculate corner coordinates of the filter button
     def getFilterCoordinates(self, data):
-        marginOutside = data.toolbarHeight / 5
+        marginOutside = data.toolbarHeight // 5
         filterIndex = self.filterIndex
-        buttonWidth = 100
+        buttonWidth = data.width // 8
         x0 = marginOutside * (filterIndex + 1) + buttonWidth * filterIndex
         y0 = marginOutside
         x1 = marginOutside * (filterIndex + 1) + buttonWidth * (filterIndex + 1)
         y1 = data.toolbarHeight - marginOutside
         return ((x0, y0, x1, y1))
         
+    # calculate corner coordinates of the given filter option
     def getOptionCoordinates(self, data, i):
         x0, y0, x1, y1 = self.getFilterCoordinates(data)
         optionX0 = x0
@@ -37,13 +43,15 @@ class Filter(object):
         
 ## check attributes
         
+    # return True if the user has clicked inside the filter button
     def clickInFilter(self, data, eventX, eventY):
         x0, y0, x1, y1 = self.getFilterCoordinates(data)
         if x0 <= eventX <= x1:
             if y0 <= eventY <= y1:
                 return True
         return False
-        
+    
+    # return True if the user has clicked inside the given filter option
     def clickInOption(self, data, eventX, eventY, i):
         optionX0, optionY0, optionX1, optionY1 = self.getOptionCoordinates(data, i)
         if optionX0 <= eventX <= optionX1:
@@ -54,46 +62,53 @@ class Filter(object):
 ## draw buttons
     
     def drawDropdown(self, data, canvas):
+        # coordinates of button corners
         x0, y0, x1, y1 = self.getFilterCoordinates(data)
-        buttonWidth = x1 - x0
-        buttonHeight = y1 - y0
+        # fonts
+        fontSize = int(data.width // 80)
+        font = design.fonts["filterText"] + " " + str(fontSize)
+        # create options
         for i in range(len(self.options)):
             option = self.options[i]
-            optionX0, optionY0, optionX1, optionY1 = self.getOptionCoordinates(data, i)
+            # design attributes
             color = design.colors["filterDropdown"]
-            if option == self.selection: color = design.colors["filterSelected"]
+            if option == self.selection:
+                color = design.colors["filterSelected"]
+            # coordinates of option corners
+            optionX0, optionY0, optionX1, optionY1 = self.getOptionCoordinates(data, i)
+            # create box
             canvas.create_rectangle(optionX0, optionY0, optionX1, optionY1,
-                                    fill=color,
-                                    width=0, activefill=design.colors["filterHover"])
-            textX = optionX0 + buttonWidth / 2
-            textY = optionY0 + buttonHeight / 2
-            font = design.fonts["filterText"] + " " + str(10)
-            canvas.create_text(textX, textY, anchor="center", font=font, 
-                           fill=design.colors["filterText"], text=option)
+                                    fill=color, width=0,
+                                    activefill=design.colors["filterHover"])
+            # create label
+            canvas.create_text((optionX0 + (x1 - x0) / 2),
+                               (optionY0 + (y1 - y0) / 2), 
+                                anchor="center", font=font, 
+                                fill=design.colors["filterText"], text=option)
         
     def draw(self, data, canvas):
         # design attributes
-        numFilters = len(data.filters)
-        marginInside = 10
-        buttonWidth = 100
+        marginInside = data.width // 80
         # coordinates of button corners
         x0, y0, x1, y1 = self.getFilterCoordinates(data)
-        # create filter button
+        # fonts
+        fontSize = int(data.width // 80)
+        font = design.fonts["filterText"] + " " + str(fontSize)
+        # create button
         canvas.create_rectangle(x0, y0, x1, y1, 
                                 fill=design.colors["filter"], width=0)
-        # create filter text
-        textX = x0 + (x1 - x0) / 2
-        textY = y0 + (y1 - y0) / 2
-        font = design.fonts["filterText"] + " " + str(10)
-        canvas.create_text(textX, textY, anchor="center", font=font, 
+        # create text
+        canvas.create_text(((x0 + x1) / 2), ((y0 + y1) / 2),
+                           anchor="center", font=font, 
                            fill=design.colors["filterText"], text=self.name)
-        # draw dropdown
+        # draw dropdown options
         if self.isClicked:
             self.drawDropdown(data, canvas)
 
 ####################################
 
 class FavoriteIcon(object):
+    
     def __init__(self):
         self.name = "Favorites"
         self.isClicked = False
