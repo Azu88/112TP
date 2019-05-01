@@ -81,10 +81,13 @@ class Filter(object):
                                     fill=color, width=0,
                                     activefill=design.colors["filterHover"])
             # create label
+            label = str(option)
+            if self.name == "Distance":
+                label += " mi"
             canvas.create_text((optionX0 + (x1 - x0) / 2),
                                (optionY0 + (y1 - y0) / 2), 
                                 anchor="center", font=font, 
-                                fill=design.colors["filterText"], text=option)
+                                fill=design.colors["filterText"], text=label)
         
     def draw(self, data, canvas):
         # design attributes
