@@ -2,6 +2,9 @@
 # Activity Tile Class
 ####################################
 
+import math
+import webbrowser
+
 from gui import design
 from gui import toolbar
 from data import favoriteActivities, rank
@@ -23,12 +26,13 @@ class Tile(object):
         self.description = activityFeatures["description"]
         self.categories = activityFeatures["categories"]
         # drawing information
-        self.favoriteButton = toolbar.FavoriteIcon()
+        self.favoriteButton = toolbar.FavoriteIcon("tile")
         self.gridIndex = gridIndex
         # drawing status
         self.smallTileIsClicked = False
         self.onScreen = True
         # data stored
+        self.urlText = None
         self.isFavorite = self.checkIfFavorite()
         
 ## calculate tile coordinates
@@ -84,6 +88,14 @@ class Tile(object):
             if y0 <= eventY <= y1:
                 return True
         return False
+        
+    # check if the user has clicked the activity's url and open webpage if so
+    def clickInUrl(self, data, canvas, eventX, eventY):
+        if self.urlText is None: return None
+        x0, y0, x1, y1 = canvas.bbox(self.urlText)
+        if x0 <= eventX <= x1:
+            if y0 <= eventY <= y1:
+                webbrowser.open(self.url)
     
 ## modify attributes
     
@@ -132,7 +144,7 @@ class Tile(object):
                            anchor="center", font=contentsFont, 
                            fill=design.colors["tileText"], 
                            text=description, width=((x1 - x0) - marginInside))
-                           
+
     def drawBigTile(self, data, canvas):
         # design attributes
         marginInside = data.width // 40
@@ -140,7 +152,8 @@ class Tile(object):
         x0, y0, x1, y1 = self.getBigTileCoordinates(data)
         tileHeight = y1 - y0
         # fonts
-        headingFontSize = int((x1 - x0) // len(self.activityName))
+        headingFontSize = int((x1 - x0) // 
+                             (5 * math.sqrt(len(self.activityName))))
         headingFont = design.fonts["tileText"] + " " + str(headingFontSize)
         contentsFontSize = int((x1 - x0) // 50)
         contentsFont = design.fonts["tileText"] + " " + str(contentsFontSize)
@@ -157,14 +170,66 @@ class Tile(object):
                            anchor="center", font=headingFont,
                            fill=design.colors["tileText"], text=heading)
         # create contents
+            # description
+        if self.description is None:
+            description = "Description not available."
+        else:
+            descriptionCutoff = int(((x1 - x0) - 2 * marginInside) * 
+                                (y1 - y0 - headingHeight) // (30 * contentsFontSize))
+            description = self.description[:descriptionCutoff] + \
+                          "..." * (len(self.description) > descriptionCutoff)
         canvas.create_text(((x0 + x1) / 2), ((y0 + headingHeight + y1) / 2),
                            anchor="center", font=contentsFont, 
                            fill=design.colors["tileText"], 
-                           text=self.description,
-                           width=((x1 - x0) - marginInside))
+                           text=description,
+                           width=((x1 - x0) - 2 * marginInside))
+            # address
+        if self.address is None:
+            address = "Address not available."
+        else:
+            address = self.address["streetAddress"] + "\n" + self.address["city"]
+        canvas.create_text(((x0 + x1) / 4), ((y0 + headingHeight + y1) / 3),
+                           anchor="center", font=contentsFont, 
+                           fill=design.colors["tileText"], 
+                           text=address, width=((x0 + x1) / 3))
+            # distance
+        if self.address is None:
+            distance = ""
+        else:
+            distance = "%.1f mi" % self.distance
+        canvas.create_text(((x0 + x1) / 2), ((y0 + headingHeight + y1) / 3),
+                           anchor="center", font=contentsFont, 
+                           fill=design.colors["tileText"], 
+                           text=distance)
+            # price
+        if self.priceRange is None:
+            price = "Price not available."
+        else:
+            price = self.priceRange
+        canvas.create_text((3 * (x0 + x1) / 4), ((y0 + headingHeight + y1) / 3),
+                           anchor="center", font=contentsFont, 
+                           fill=design.colors["tileText"], 
+                           text=price)
+            # url
+        if self.url is None:
+            url = "URL not available."
+            urlFont = contentsFont
+            canvas.create_text(((x0 + x1) / 2), (2 * (y0 + headingHeight + y1) / 3),
+                               anchor="center", font=urlFont, 
+                               fill=design.colors["tileText"], text=url)
+        else:
+            url = self.url
+            urlFontSize = int((x1 - x0) // (8 * math.sqrt(len(self.url))))
+            urlFont = design.fonts["tileText"] + " " + str(urlFontSize)
+            self.urlText = canvas.create_text(((x0 + x1) / 2), 
+                                              (2 * (y0 + headingHeight + y1) / 3),
+                                              anchor="center", font=urlFont, 
+                                              fill=design.colors["tileText"], 
+                                              activefill=design.colors["urlHover"],
+                                              text=url)
         # create favorite button
-        favButtonColor = design.colors["bigTileFaveIcon"]
-        if not self.isFavorite:
-            favButtonColor = design.colors["filter"]
-        self.favoriteButton.draw(data, canvas, x0, y0, x1, y1,
-                                 color=favButtonColor, text="Favorite")
+        if self.isFavorite:
+            favButtonColor = design.colors["bigTileFaveIcon"]
+        else:
+            favButtonColor = design.colors["bigTile"]
+        self.favoriteButton.draw(data, canvas, color=favButtonColor)

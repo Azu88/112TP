@@ -15,16 +15,16 @@ def init(data):
     # design attributes
     data.toolbarHeight = data.height / 8
     data.tileGrid = {"rows": 2, "cols" : 3}
-    data.scrollY = 0
     data.scrollSpeed = 10
     # drawing status
     data.drawingSmallTiles = True
     data.usingFilter = False
+    data.scrollY = 0
     # toolbar
-    data.filters = [Filter("Distance", [1, 253, 260], 0), #[1, 5, 10, 25, 50, 100], 0),
+    data.filters = [Filter("Distance", [1, 5, 10, 25, 50, 100], 0),
                     Filter("Price", ["free", "$", "$$", "$$$"], 1),
                     Filter("Category", filteredLocalActivities.categories, 2)]
-    data.favoriteButton = FavoriteIcon()
+    data.favoriteButton = FavoriteIcon("toolbar")
     # generate activities to display
     rank.updateTagCount()
     generateActivities(data)
@@ -55,7 +55,7 @@ def smallTileClicked(data, eventX, eventY):
             return None
     
 # check for user interaction with big tile
-def bigTileClicked(data, eventX, eventY):
+def bigTileClicked(data, canvas, eventX, eventY):
     for activity in data.activities:
         if activity.smallTileIsClicked:
             # check if current big tile should be exited
@@ -63,11 +63,12 @@ def bigTileClicked(data, eventX, eventY):
                 data.drawingSmallTiles = True # start drawing small tiles
                 activity.smallTileIsClicked = False
                 break
-            # check if current big tile's favorite button has been clicked
             else:                        
-                x0, y0, x1, y1 = activity.getBigTileCoordinates(data)
-                if activity.favoriteButton.clickInButton(data, eventX, eventY, x0, y0, x1, y1):
+                # check if current big tile's favorite button has been clicked
+                if activity.favoriteButton.clickInButton(data, eventX, eventY):
                     activity.favorite()
+                # check if current activity's url has been clicked
+                activity.clickInUrl(data, canvas, eventX, eventY)
     
 ## respond to user actions
 
@@ -92,9 +93,7 @@ def updateFilters(data, eventX, eventY):
                     generateActivities(data, onlyFavorites=data.favoriteButton.isClicked)
     usingFilter(data)
     
-def mousePressed(event, data):
-    # interact with filters
-    updateFilters(data, event.x, event.y)
+def mousePressed(event, data, canvas):
     # interact with tiles
     if not data.usingFilter:
         # if small tiles are currently displayed, check if one has been clicked
@@ -102,10 +101,11 @@ def mousePressed(event, data):
             smallTileClicked(data, event.x, event.y)
         # if a big tile is currently displayed, check for user interaction
         else:
-            bigTileClicked(data, event.x, event.y)
+            bigTileClicked(data, canvas, event.x, event.y)
+    # interact with filters
+    updateFilters(data, event.x, event.y)
     # interact with favorites button
-    x0, y0, x1, y1 = 0, 0, data.width, data.height
-    if data.favoriteButton.clickInButton(data, event.x, event.y, x0, y0, x1, y1):
+    if data.favoriteButton.clickInButton(data, event.x, event.y):
         data.favoriteButton.isClicked = not data.favoriteButton.isClicked
         generateActivities(data, onlyFavorites=data.favoriteButton.isClicked)
         data.scrollY = 0
@@ -144,7 +144,7 @@ def redrawAll(canvas, data):
     for filter in data.filters:
         filter.draw(data, canvas)
     # draw favorite button
-    data.favoriteButton.draw(data, canvas, 0, 0, data.width, data.height)
+    data.favoriteButton.draw(data, canvas)
 
 ####################################
 # adapted from https://www.cs.cmu.edu/~112/notes/notes-animations-part2.html
@@ -160,7 +160,7 @@ def runApp(width=800, height=600):
         canvas.update()    
 
     def mousePressedWrapper(event, canvas, data):
-        mousePressed(event, data)
+        mousePressed(event, data, canvas)
         redrawAllWrapper(canvas, data)
 
     def keyPressedWrapper(event, canvas, data):

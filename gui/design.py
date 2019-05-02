@@ -9,7 +9,8 @@ colors = {"toolbar" : "snow2",
           "tileText" : "indian red",
           "bigTile" : "peach puff",
           "bigTileHeading" : "sandy brown",
-          "bigTileFaveIcon" : "indian red"}
+          "bigTileFaveIcon" : "indian red",
+          "urlHover" : "blue4"}
           
 fonts = {"filterText" : "Arial",
          "tileText" : "Arial"}
