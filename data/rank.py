@@ -26,9 +26,10 @@ def updateTagCount():
 # calculate score (tag count sum) corresponding to given list of activity tags
 def getActivityScore(tags):
     score = 0
-    for tag in tags:
-        if tag in tagCount:
-            score += tagCount[tag]
+    if tags is not None:
+        for tag in tags:
+            if tag in tagCount:
+                score += tagCount[tag]
     return score
     
 # return list of activities sorted by score

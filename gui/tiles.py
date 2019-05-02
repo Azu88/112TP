@@ -24,6 +24,8 @@ class Tile(object):
         self.priceRange = activityFeatures["priceRange"]
         self.distance = activityFeatures["distance"]
         self.description = activityFeatures["description"]
+        if self.description is not None:
+            self.description = self.description.replace("\n\n", "\n")
         self.categories = activityFeatures["categories"]
         # drawing information
         self.favoriteButton = toolbar.FavoriteIcon("tile")
@@ -175,7 +177,7 @@ class Tile(object):
             description = "Description not available."
         else:
             descriptionCutoff = int(((x1 - x0) - 2 * marginInside) * 
-                                (y1 - y0 - headingHeight) // (30 * contentsFontSize))
+                                (y1 - y0 - headingHeight) // (32 * contentsFontSize))
             description = self.description[:descriptionCutoff] + \
                           "..." * (len(self.description) > descriptionCutoff)
         canvas.create_text(((x0 + x1) / 2), ((y0 + headingHeight + y1) / 2),
@@ -184,7 +186,8 @@ class Tile(object):
                            text=description,
                            width=((x1 - x0) - 2 * marginInside))
             # address
-        if self.address is None:
+        if self.address is None or (
+           self.address["streetAddress"] is None or self.address["city"] is None):
             address = "Address not available."
         else:
             address = self.address["streetAddress"] + "\n" + self.address["city"]
@@ -193,7 +196,7 @@ class Tile(object):
                            fill=design.colors["tileText"], 
                            text=address, width=((x0 + x1) / 3))
             # distance
-        if self.address is None:
+        if self.distance is None:
             distance = ""
         else:
             distance = "%.1f mi" % self.distance

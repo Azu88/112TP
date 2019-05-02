@@ -1,4 +1,8 @@
 ####################################
+# Location Functions
+####################################
+
+####################################
 # adapted from
 # https://www.freecodecamp.org/forum/t/make-a-script-read-gps-geolocation/241607
 ####################################

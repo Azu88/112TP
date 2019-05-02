@@ -3,15 +3,16 @@
 ####################################
 
 from tkinter import *
+import datetime
 
 from gui.design import *
 from gui.toolbar import *
 from gui.tiles import *
-from data import filteredLocalActivities, recommendedLocalActivities
+from data import localActivities, filteredLocalActivities, recommendedLocalActivities
 
 ####################################
 
-def init(data):
+def init(data, preloadedData):
     # design attributes
     data.toolbarHeight = data.height / 8
     data.tileGrid = {"rows": 2, "cols" : 3}
@@ -26,8 +27,16 @@ def init(data):
                     Filter("Category", filteredLocalActivities.categories, 2)]
     data.favoriteButton = FavoriteIcon("toolbar")
     # generate activities to display
+    if preloadedData == False:
+        webscraping()
     rank.updateTagCount()
     generateActivities(data)
+
+def webscraping(userCity=None):
+    print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    print("webscraping...")
+    localActivities.storeBaseSet(userCity)
+    print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
     
 def generateActivities(data, onlyFavorites=False):
     filteredLocalActivities.storeCurrentSet(onlyFavorites)
@@ -151,7 +160,7 @@ def redrawAll(canvas, data):
 ####################################
 
 # run the application gui
-def runApp(width=800, height=600):
+def runApp(width=800, height=600, preloadedData=False):
     def redrawAllWrapper(canvas, data):
         canvas.delete(ALL)
         canvas.create_rectangle(0, 0, data.width, data.height,
@@ -181,7 +190,7 @@ def runApp(width=800, height=600):
     root = Tk()
     root.title("Bored?")
     root.resizable(width=False, height=False) # prevents resizing window
-    init(data)
+    init(data, preloadedData)
     # create the root and the canvas
     canvas = Canvas(root, width=data.width, height=data.height)
     canvas.configure(bd=0, highlightthickness=0)

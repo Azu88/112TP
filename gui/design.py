@@ -1,3 +1,7 @@
+####################################
+# Design Attributes
+####################################
+
 colors = {"toolbar" : "snow2",
           "filter" : "snow3",
           "filterDropdown" : "snow4",

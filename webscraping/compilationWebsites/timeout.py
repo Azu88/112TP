@@ -1,9 +1,15 @@
+####################################
+# Timeout Webscraping Functions
+####################################
+
 import requests
 import json
 from bs4 import BeautifulSoup, Doctype
 from bs4 import SoupStrainer
 
 from webscraping import location
+
+####################################
 
 timeoutUrl = "https://www.timeout.com"
 
@@ -47,9 +53,9 @@ def getTileItems(navUrl):
     pageResponse = requests.get(navUrl)
     pageParser = BeautifulSoup(pageResponse.text, parser,
                                parse_only=tileItemStrainer)
-    limit = 10
+    # limit = 10
     for item in pageParser:
-        if len(tileItems) > limit: break
+        # if len(tileItems) > limit: break
         if isinstance(item, Doctype):
             item.extract()
         else:
@@ -70,9 +76,9 @@ def getListedActivities(tileUrl):
     pageResponse = requests.get(tileUrl)
     pageParser = BeautifulSoup(pageResponse.text, parser,
                                parse_only=listedActivityStrainer)
-    limit = 10
+    # limit = 10
     for item in pageParser:
-        if len(listedActivities) > limit: break
+        # if len(listedActivities) > limit: break
         if isinstance(item, Doctype):
             item.extract()
         else:
@@ -213,7 +219,7 @@ def getAllActivities(userCity=None):
                             urlsSeen.add(activityUrl)
                             activityFeatures = getActivityInfo(activityUrl)
                             if activityFeatures is not None:
-                                allActivities[activity] = activityFeatures
+                                allActivities[activity] = activityFeatures 
         else:
             listedActivities = getListedActivities(navUrl)
             if listedActivities is not None:
